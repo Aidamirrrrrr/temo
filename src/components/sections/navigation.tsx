@@ -18,6 +18,7 @@ export function Navigation() {
     { name: t.nav.about, href: "#about" },
     { name: t.nav.services, href: "#services" },
     { name: t.nav.work, href: "#work" },
+    { name: t.nav.blog, href: "#blog" },
     { name: t.nav.contact, href: "#contact" },
   ];
 
