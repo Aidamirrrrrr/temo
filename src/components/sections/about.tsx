@@ -64,7 +64,7 @@ function ParallaxText({
 
 export function About() {
   const sectionRef = useRef<HTMLDivElement>(null);
-  const isInView = useInView(sectionRef, { once: true, margin: "-200px" });
+  const isInView = useInView(sectionRef, { once: true, margin: "-80px" });
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start end", "end start"],
@@ -82,19 +82,20 @@ export function About() {
     <section
       id="about"
       ref={sectionRef}
-      className="relative z-10 overflow-hidden rounded-t-[2rem] bg-white py-32 shadow-[0_-20px_60px_rgba(0,0,0,0.08)] lg:py-48"
+      data-nav-theme="dark"
+      className="relative z-10 overflow-hidden rounded-t-[2rem] bg-neutral-950 py-32 shadow-[0_-20px_60px_rgba(0,0,0,0.3)] lg:py-48"
     >
       {/* Big parallax 404 */}
       <motion.div
         style={{ y: bgY }}
         className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 select-none"
       >
-        <span className="font-mono text-[20rem] font-black leading-none text-neutral-100 sm:text-[28rem] lg:text-[36rem]">
+        <span className="font-mono text-[20rem] font-black leading-none text-white/3 sm:text-[28rem] lg:text-[36rem]">
           404
         </span>
       </motion.div>
 
-      <div className="relative z-10 mx-auto max-w-7xl px-6 lg:px-12">
+      <div className="relative z-10 mx-auto max-w-6xl px-6 lg:px-12">
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
@@ -105,12 +106,13 @@ export function About() {
           className="mb-20"
         >
           <LocaleTransition>
-            <span className="mb-4 inline-block font-mono text-sm uppercase tracking-[0.2em] text-neutral-400">
+            <span className="mb-4 inline-flex items-center gap-2 font-mono text-sm uppercase tracking-widest text-neutral-500">
+              <span className="inline-block h-px w-8 bg-neutral-700" />
               {t.about.label}
             </span>
-            <h2 className="max-w-4xl text-4xl font-bold leading-tight tracking-tight text-black sm:text-5xl lg:text-6xl">
+            <h2 className="max-w-4xl text-4xl font-bold leading-tight tracking-tight text-white sm:text-5xl lg:text-6xl">
               {t.about.title}{" "}
-              <span className="text-neutral-400">{t.about.titleAccent}</span>
+              <span className="text-neutral-600">{t.about.titleAccent}</span>
             </h2>
           </LocaleTransition>
         </motion.div>
@@ -121,7 +123,7 @@ export function About() {
               initial={{ opacity: 0, y: 30 }}
               animate={isInView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.8, delay: 0.2 }}
-              className="text-lg leading-relaxed text-neutral-600"
+              className="text-lg leading-relaxed text-neutral-400"
             >
               <LocaleTransition>{t.about.text1}</LocaleTransition>
             </motion.p>
@@ -132,7 +134,7 @@ export function About() {
               initial={{ opacity: 0, y: 30 }}
               animate={isInView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.8, delay: 0.4 }}
-              className="text-lg leading-relaxed text-neutral-600"
+              className="text-lg leading-relaxed text-neutral-400"
             >
               <LocaleTransition>{t.about.text2}</LocaleTransition>
             </motion.p>
@@ -144,11 +146,11 @@ export function About() {
           initial={{ opacity: 0, y: 40 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.8, delay: 0.6 }}
-          className="mt-24 grid grid-cols-3 gap-8 border-t border-neutral-200 pt-16"
+          className="mt-24 grid grid-cols-3 gap-8 border-t border-neutral-800 pt-16"
         >
           {stats.map((stat) => (
             <div key={stat.label} className="text-center">
-              <div className="font-mono text-4xl font-bold text-black sm:text-5xl lg:text-6xl">
+              <div className="font-mono text-4xl font-bold text-white sm:text-5xl lg:text-6xl">
                 <Counter value={stat.value} suffix={stat.suffix} />
               </div>
               <LocaleTransition>

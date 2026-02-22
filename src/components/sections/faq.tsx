@@ -1,7 +1,14 @@
 "use client";
 
-import { motion, useInView, AnimatePresence } from "framer-motion";
+import {
+  motion,
+  useInView,
+  useScroll,
+  useTransform,
+  AnimatePresence,
+} from "framer-motion";
 import { useRef, useState } from "react";
+import { ArrowUpRight } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import { LocaleTransition } from "@/components/locale-transition";
 
@@ -10,70 +17,83 @@ interface FaqItem {
   answer: string;
 }
 
-function FaqAccordion({
+/* ── Single FAQ row — underline + rotate number ── */
+function FaqRow({
   item,
   index,
   isOpen,
   onToggle,
+  isInView,
 }: {
   item: FaqItem;
   index: number;
   isOpen: boolean;
   onToggle: () => void;
+  isInView: boolean;
 }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const isInView = useInView(ref, { once: true, margin: "-50px" });
-
   return (
     <motion.div
-      ref={ref}
       initial={{ opacity: 0, y: 30 }}
       animate={isInView ? { opacity: 1, y: 0 } : {}}
       transition={{
         duration: 0.6,
-        delay: index * 0.1,
+        delay: index * 0.08,
         ease: [0.16, 1, 0.3, 1],
       }}
-      className="border-b border-neutral-200 last:border-b-0"
+      className="group border-b border-neutral-800"
     >
       <button
         type="button"
         onClick={onToggle}
-        className="group flex w-full items-center justify-between py-7 text-left transition-colors"
+        className="flex w-full items-center gap-6 py-7 text-left sm:gap-8 sm:py-9 lg:gap-10"
       >
-        <div className="flex items-center gap-6">
-          <span className="font-mono text-sm text-neutral-300 transition-colors group-hover:text-black">
-            {String(index + 1).padStart(2, "0")}
-          </span>
-          <LocaleTransition>
-            <span className="text-lg font-medium text-black transition-colors group-hover:text-neutral-600">
-              {item.question}
-            </span>
-          </LocaleTransition>
-        </div>
+        {/* Number — rotates on open */}
+        <motion.span
+          animate={{ rotate: isOpen ? 90 : 0 }}
+          transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+          className={`shrink-0 font-mono text-xs transition-colors duration-400 ${
+            isOpen ? "text-white" : "text-neutral-600"
+          }`}
+        >
+          {String(index + 1).padStart(2, "0")}
+        </motion.span>
 
-        <motion.div
-          animate={{ rotate: isOpen ? 45 : 0 }}
-          transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-neutral-200 transition-all duration-300 group-hover:border-black group-hover:bg-black group-hover:text-white"
+        {/* Question */}
+        <LocaleTransition>
+          <span
+            className={`min-w-0 flex-1 text-lg font-semibold transition-colors duration-400 sm:text-xl lg:text-2xl ${
+              isOpen ? "text-white" : "text-neutral-400"
+            }`}
+          >
+            {item.question}
+          </span>
+        </LocaleTransition>
+
+        {/* Arrow that flips */}
+        <motion.span
+          animate={{ rotate: isOpen ? 180 : 0 }}
+          transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+          className="shrink-0 text-neutral-400"
         >
           <svg
-            width="14"
-            height="14"
-            viewBox="0 0 14 14"
+            width="16"
+            height="16"
+            viewBox="0 0 16 16"
             fill="none"
             aria-hidden="true"
           >
             <path
-              d="M7 1V13M1 7H13"
+              d="M4 6L8 10L12 6"
               stroke="currentColor"
               strokeWidth="1.5"
               strokeLinecap="round"
+              strokeLinejoin="round"
             />
           </svg>
-        </motion.div>
+        </motion.span>
       </button>
 
+      {/* Answer */}
       <AnimatePresence initial={false}>
         {isOpen && (
           <motion.div
@@ -83,9 +103,9 @@ function FaqAccordion({
             transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
             className="overflow-hidden"
           >
-            <div className="pb-7 pl-12">
+            <div className="pb-8 pl-12 sm:pl-14 lg:pl-16">
               <LocaleTransition>
-                <p className="max-w-2xl text-base leading-relaxed text-neutral-500">
+                <p className="max-w-2xl text-sm leading-relaxed text-neutral-500 lg:text-base">
                   {item.answer}
                 </p>
               </LocaleTransition>
@@ -99,9 +119,15 @@ function FaqAccordion({
 
 export function Faq() {
   const sectionRef = useRef<HTMLDivElement>(null);
-  const isInView = useInView(sectionRef, { once: true, margin: "-200px" });
+  const isInView = useInView(sectionRef, { once: true, margin: "-150px" });
   const [openIndex, setOpenIndex] = useState<number | null>(null);
   const { t } = useI18n();
+
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start end", "end start"],
+  });
+  const bgY = useTransform(scrollYProgress, [0, 1], ["0%", "-8%"]);
 
   const faqItems: FaqItem[] = [
     { question: t.faq.q1, answer: t.faq.a1 },
@@ -112,33 +138,71 @@ export function Faq() {
   ];
 
   return (
-    <section ref={sectionRef} className="relative z-10 bg-white py-32 lg:py-48">
-      <div className="mx-auto max-w-4xl px-6 lg:px-12">
-        <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-          className="mb-16 text-center"
-        >
-          <LocaleTransition>
-            <span className="mb-4 inline-block font-mono text-sm uppercase tracking-[0.2em] text-neutral-400">
-              {t.faq.label}
-            </span>
-            <h2 className="text-4xl font-bold leading-tight tracking-tight text-black sm:text-5xl lg:text-6xl">
-              {t.faq.title}{" "}
-              <span className="text-neutral-400">{t.faq.titleAccent}</span>
-            </h2>
-          </LocaleTransition>
-        </motion.div>
+    <section
+      ref={sectionRef}
+      data-nav-theme="dark"
+      className="relative z-10 overflow-hidden bg-neutral-950 py-32 lg:py-48"
+    >
+      {/* Background watermark */}
+      <motion.div
+        style={{ y: bgY }}
+        className="pointer-events-none absolute -right-10 top-1/2 -translate-y-1/2 select-none"
+      >
+        <span className="font-mono text-[20rem] font-black leading-none text-white/5 lg:text-[30rem]">
+          FAQ
+        </span>
+      </motion.div>
 
-        <div className="rounded-2xl border border-neutral-200 bg-white p-2 sm:p-4">
+      <div className="relative mx-auto max-w-6xl px-6 lg:px-12">
+        {/* Header */}
+        <div className="mb-20 grid gap-8 md:mb-24 md:grid-cols-2 md:items-end">
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            animate={isInView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <LocaleTransition>
+              <span className="mb-4 inline-flex items-center gap-2 font-mono text-sm uppercase tracking-widest text-neutral-500">
+                <span className="inline-block h-px w-8 bg-neutral-700" />
+                {t.faq.label}
+              </span>
+              <h2 className="text-4xl font-bold leading-tight tracking-tight text-white sm:text-5xl lg:text-6xl">
+                {t.faq.title}{" "}
+                <span className="text-neutral-600">{t.faq.titleAccent}</span>
+              </h2>
+            </LocaleTransition>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={isInView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.8, delay: 0.15 }}
+            className="md:text-right"
+          >
+            <a
+              href="#contact"
+              className="group inline-flex items-center gap-2 text-sm font-medium text-neutral-500 transition-colors hover:text-white"
+            >
+              <LocaleTransition className="inline">
+                {t.faq.q5.includes("поддержку")
+                  ? "Не нашли ответ? Напишите нам"
+                  : "Didn't find your answer? Contact us"}
+              </LocaleTransition>
+              <ArrowUpRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+            </a>
+          </motion.div>
+        </div>
+
+        {/* FAQ list — clean accordion */}
+        <div>
           {faqItems.map((item, i) => (
-            <FaqAccordion
+            <FaqRow
               key={item.question}
               item={item}
               index={i}
               isOpen={openIndex === i}
               onToggle={() => setOpenIndex(openIndex === i ? null : i)}
+              isInView={isInView}
             />
           ))}
         </div>

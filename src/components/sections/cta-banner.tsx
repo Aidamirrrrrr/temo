@@ -2,131 +2,123 @@
 
 import { motion, useInView, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
+import { ArrowRight } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import { LocaleTransition } from "@/components/locale-transition";
 
 export function CtaBanner() {
   const sectionRef = useRef<HTMLDivElement>(null);
-  const isInView = useInView(sectionRef, { once: true, margin: "-200px" });
+  const isInView = useInView(sectionRef, { once: true, margin: "-150px" });
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start end", "end start"],
   });
 
-  const bgRotate = useTransform(scrollYProgress, [0, 1], [0, 180]);
-  const scale = useTransform(scrollYProgress, [0, 0.5, 1], [0.9, 1, 0.95]);
+  const bgY = useTransform(scrollYProgress, [0, 1], ["0%", "-8%"]);
   const { t } = useI18n();
+
+  const stats = [
+    { value: t.ctaBanner.stat1val, label: t.ctaBanner.stat1label },
+    { value: t.ctaBanner.stat2val, label: t.ctaBanner.stat2label },
+    { value: t.ctaBanner.stat3val, label: t.ctaBanner.stat3label },
+  ];
 
   return (
     <section
       ref={sectionRef}
-      className="relative z-10 bg-neutral-50 py-20 lg:py-32"
+      data-nav-theme="dark"
+      className="relative z-10 overflow-hidden bg-neutral-950 py-32 lg:py-48"
     >
-      <div className="mx-auto max-w-7xl px-6 lg:px-12">
+      {/* Background watermark */}
+      <motion.div
+        style={{ y: bgY }}
+        className="pointer-events-none absolute -right-10 top-1/2 -translate-y-1/2 select-none"
+      >
+        <span className="font-mono text-[20rem] font-black leading-none text-white/5 lg:text-[30rem]">
+          →
+        </span>
+      </motion.div>
+
+      <div className="relative mx-auto max-w-6xl px-6 lg:px-12">
+        {/* Header */}
         <motion.div
-          style={{ scale }}
-          className="relative overflow-hidden rounded-3xl bg-black p-12 sm:p-16 lg:p-24"
+          initial={{ opacity: 0, y: 40 }}
+          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+          className="mb-20 lg:mb-28"
         >
-          {/* Animated background shapes */}
-          <div className="pointer-events-none absolute inset-0 overflow-hidden">
-            <motion.div
-              style={{ rotate: bgRotate }}
-              className="absolute -top-1/2 -right-1/4 h-[600px] w-[600px] rounded-full border border-white/5"
-            />
-            <motion.div
-              style={{ rotate: bgRotate }}
-              className="absolute -bottom-1/2 -left-1/4 h-[800px] w-[800px] rounded-full border border-white/5"
-            />
-            <motion.div
-              animate={{
-                x: [0, 30, 0],
-                y: [0, -20, 0],
-              }}
-              transition={{
-                duration: 8,
-                repeat: Number.POSITIVE_INFINITY,
-                ease: "easeInOut",
-              }}
-              className="absolute top-1/4 right-1/4 h-2 w-2 rounded-full bg-white/20"
-            />
-            <motion.div
-              animate={{
-                x: [0, -20, 0],
-                y: [0, 30, 0],
-              }}
-              transition={{
-                duration: 10,
-                repeat: Number.POSITIVE_INFINITY,
-                ease: "easeInOut",
-              }}
-              className="absolute bottom-1/3 left-1/3 h-3 w-3 rounded-full bg-white/10"
-            />
+          <LocaleTransition>
+            <span className="mb-4 inline-flex items-center gap-2 font-mono text-sm uppercase tracking-widest text-neutral-500">
+              <span className="inline-block h-px w-8 bg-neutral-700" />
+              CTA
+            </span>
+            <h2 className="text-4xl font-bold leading-tight tracking-tight text-white sm:text-5xl lg:text-6xl">
+              {t.ctaBanner.title}{" "}
+              <span className="text-neutral-600">
+                {t.ctaBanner.titleAccent}
+              </span>
+            </h2>
+          </LocaleTransition>
+        </motion.div>
 
-            {/* Grid overlay */}
-            <div className="absolute inset-0 opacity-[0.03]">
-              <svg width="100%" height="100%">
-                <defs>
-                  <pattern
-                    id="cta-grid"
-                    width="40"
-                    height="40"
-                    patternUnits="userSpaceOnUse"
-                  >
-                    <path
-                      d="M 40 0 L 0 0 0 40"
-                      fill="none"
-                      stroke="white"
-                      strokeWidth="0.5"
-                    />
-                  </pattern>
-                </defs>
-                <rect width="100%" height="100%" fill="url(#cta-grid)" />
-              </svg>
-            </div>
-          </div>
-
-          <div className="relative z-10 text-center">
+        {/* Two-column: text + stats */}
+        <div className="grid items-start gap-16 lg:grid-cols-2 lg:gap-20">
+          {/* Left: description + CTA */}
+          <div>
             <motion.div
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: 20 }}
               animate={isInView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+              transition={{ duration: 0.8, delay: 0.15 }}
             >
               <LocaleTransition>
-                <h2 className="mb-6 text-4xl font-bold leading-tight tracking-tight text-white sm:text-5xl lg:text-7xl">
-                  {t.ctaBanner.title}
-                  <br />
-                  <span className="text-neutral-500">
-                    {t.ctaBanner.titleAccent}
-                  </span>
-                </h2>
+                <p className="mb-10 max-w-md text-base leading-relaxed text-neutral-400 lg:text-lg">
+                  {t.ctaBanner.text}
+                </p>
               </LocaleTransition>
+
+              <motion.a
+                initial={{ opacity: 0, y: 20 }}
+                animate={isInView ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.8, delay: 0.3 }}
+                href="#contact"
+                className="group inline-flex items-center gap-3 rounded-full bg-white px-8 py-4 text-sm font-semibold text-black transition-all duration-300 hover:gap-5 hover:bg-neutral-200"
+              >
+                <LocaleTransition className="inline">
+                  {t.ctaBanner.cta}
+                </LocaleTransition>
+                <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+              </motion.a>
             </motion.div>
-
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              animate={isInView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.8, delay: 0.2 }}
-              className="mx-auto mb-10 max-w-lg text-neutral-400"
-            >
-              <LocaleTransition>{t.ctaBanner.text}</LocaleTransition>
-            </motion.p>
-
-            <motion.a
-              initial={{ opacity: 0, y: 20 }}
-              animate={isInView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.8, delay: 0.4 }}
-              href="#contact"
-              className="group inline-flex items-center gap-3 rounded-full border border-white/20 bg-white px-8 py-4 text-sm font-medium text-black transition-all duration-300 hover:gap-5 hover:bg-neutral-100"
-            >
-              <LocaleTransition className="inline">
-                {t.ctaBanner.cta}
-              </LocaleTransition>
-              <span className="transition-transform duration-300 group-hover:translate-x-1">
-                →
-              </span>
-            </motion.a>
           </div>
-        </motion.div>
+
+          {/* Right: stats */}
+          <div className="flex flex-col gap-0">
+            {stats.map((stat, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, x: 20 }}
+                animate={isInView ? { opacity: 1, x: 0 } : {}}
+                transition={{
+                  duration: 0.6,
+                  delay: 0.2 + i * 0.1,
+                  ease: [0.16, 1, 0.3, 1],
+                }}
+                className="flex items-baseline justify-between border-b border-neutral-800 py-8 first:pt-0 last:border-b-0"
+              >
+                <LocaleTransition>
+                  <span className="text-xs uppercase tracking-widest text-neutral-500">
+                    {stat.label}
+                  </span>
+                </LocaleTransition>
+                <LocaleTransition>
+                  <span className="text-4xl font-bold text-white sm:text-5xl">
+                    {stat.value}
+                  </span>
+                </LocaleTransition>
+              </motion.div>
+            ))}
+          </div>
+        </div>
       </div>
     </section>
   );

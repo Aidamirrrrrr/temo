@@ -25,11 +25,11 @@ export default function Home() {
           <About />
           <Services />
           <Process />
-          <Stack />
           <Projects />
           <Testimonials />
-          <Blog />
+          <Stack />
           <Faq />
+          <Blog />
           <CtaBanner />
           <Contact />
         </main>
