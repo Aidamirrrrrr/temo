@@ -6,7 +6,7 @@ import {
   useTransform,
   useInView,
   useMotionValue,
-  useSpring,
+  animate,
 } from "framer-motion";
 import { useRef, useEffect } from "react";
 import { useI18n } from "@/lib/i18n";
@@ -14,29 +14,36 @@ import { LocaleTransition } from "@/components/locale-transition";
 
 // About section slides over the sticky Hero
 
-function Counter({ value, suffix = "" }: { value: number; suffix?: string }) {
+function Counter({
+  value,
+  suffix = "",
+  started,
+}: {
+  value: number;
+  suffix?: string;
+  started: boolean;
+}) {
   const ref = useRef<HTMLSpanElement>(null);
   const motionValue = useMotionValue(0);
-  const springValue = useSpring(motionValue, {
-    stiffness: 50,
-    damping: 30,
-  });
-  const isInView = useInView(ref, { once: true, margin: "-100px" });
 
   useEffect(() => {
-    if (isInView) {
-      motionValue.set(value);
+    if (started) {
+      const controls = animate(motionValue, value, {
+        duration: 1.2,
+        ease: [0.16, 1, 0.3, 1],
+      });
+      return controls.stop;
     }
-  }, [isInView, motionValue, value]);
+  }, [started, motionValue, value]);
 
   useEffect(() => {
-    const unsubscribe = springValue.on("change", (latest) => {
+    const unsubscribe = motionValue.on("change", (latest) => {
       if (ref.current) {
         ref.current.textContent = `${Math.floor(latest)}${suffix}`;
       }
     });
     return unsubscribe;
-  }, [springValue, suffix]);
+  }, [motionValue, suffix]);
 
   return <span ref={ref}>0{suffix}</span>;
 }
@@ -64,7 +71,9 @@ function ParallaxText({
 
 export function About() {
   const sectionRef = useRef<HTMLDivElement>(null);
+  const statsRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(sectionRef, { once: true, margin: "-80px" });
+  const statsInView = useInView(statsRef, { once: true, margin: "50px" });
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start end", "end start"],
@@ -143,6 +152,7 @@ export function About() {
 
         {/* Stats */}
         <motion.div
+          ref={statsRef}
           initial={{ opacity: 0, y: 40 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.8, delay: 0.6 }}
@@ -151,7 +161,11 @@ export function About() {
           {stats.map((stat) => (
             <div key={stat.label} className="text-center">
               <div className="font-mono text-4xl font-bold text-white sm:text-5xl lg:text-6xl">
-                <Counter value={stat.value} suffix={stat.suffix} />
+                <Counter
+                  value={stat.value}
+                  suffix={stat.suffix}
+                  started={statsInView}
+                />
               </div>
               <LocaleTransition>
                 <p className="mt-2 text-sm text-neutral-500">{stat.label}</p>
